@@ -1,7 +1,7 @@
 import numpy as np
 import models.hepatitis_b as model
 import numerical_methods.euler as euler
-import control_methods.continuous as stc
+import control_methods.discrete as stc
 
 
 def get_delay(i, m, x, lags):
@@ -87,24 +87,21 @@ def calculate(time, history, a, control_params=None):
 
             xi = model.get_xi(x, 0.5)
 
-            if control_params is None:
-                psi, psi1, psi2, u, disturbance = 0, 0, 0, 0, 0
+            x1_const, psi, psi1, psi2, u, disturbance = 0, 0, 0, 0, 0, 0
 
-            else:
+            if control_params is not None:
                 x1_const = control_params['x1_const']
-                T1 = control_params['T1']
-                T2 = control_params['T2']
+                l1 = control_params['l1']
+                l2 = control_params['l2']
 
                 if control_params['type'] == 'adar':
-                    psi, psi1, psi2, u = stc.adar(a, T1, T2, xi, x1_const, x, xlag)
+                    psi, psi1, psi2, u = stc.adar(a, h, l1, l2, xi, x1_const, x, xlag)
                     disturbance = 0
 
-                # TODO : doesn't work properly
-                elif control_params['type'] == 'nad':
-                    k = control_params['k']
-                    n = control_params['n']
-                    psi, psi1, psi2, u = stc.nad(a, k, n, T1, T2, xi, x1_const, x, xlag)
-                    disturbance = 0.1
+                if u < 0:
+                    u = 0
+                elif u > 20:
+                    u = 20
 
             control[0].append(psi)
             control[1].append(psi1)
