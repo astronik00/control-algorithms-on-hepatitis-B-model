@@ -1,5 +1,5 @@
 import utils.plotter as plotter
-from scheme.different_delays import calculate
+from scheme.continuous import calculate
 
 filepath = 'coefficients/coeffs1.txt'
 a = [float(x) for x in open(filepath).read().split("\n")]
