@@ -41,5 +41,5 @@ def x10_next(a, h, x, u, disturbance):
     return x[9][-1] + h * (model.f10(a, x) + u + disturbance)
 
 
-def x11_next(a, h, x1_const, x):
-    return x[10][-1] + h * model.f11(a, x1_const, x)
+def x11_next(n, h, x1_const, x):
+    return x[10][-1] + h * model.f11(n, x1_const, x[0][-1])

@@ -87,7 +87,7 @@ def calculate(time, history, a, control_params=None):
 
             xi = model.get_xi(x, 0.5)
 
-            x1_const, psi, psi1, psi2, u, disturbance = 0, 0, 0, 0, 0, 0
+            n, k, x1_const, psi, psi1, psi2, u, disturbance = 0, 0, 0, 0, 0, 0, 0, 0
 
             if control_params is not None:
                 x1_const = control_params['x1_const']
@@ -97,6 +97,12 @@ def calculate(time, history, a, control_params=None):
                 if control_params['type'] == 'adar':
                     psi, psi1, psi2, u = stc.adar(a, h, l1, l2, xi, x1_const, x, xlag)
                     disturbance = 0
+
+                elif control_params['type'] == 'nad':
+                    k = control_params['k']
+                    n = control_params['n']
+                    disturbance = control_params['disturbance']
+                    psi, psi1, psi2, u = stc.nad(a, h, k, n, l1, l2, xi, x1_const, x, xlag)
 
                 if u < 0:
                     u = 0
@@ -121,9 +127,13 @@ def calculate(time, history, a, control_params=None):
 
             if control_params is not None:
                 if control_params['type'] == 'nad':
-                    x[10].append(euler.x11_next(a, h, x1_const, x))
+                    x[10].append(euler.x11_next(n, h, x1_const, x))
 
             t.append(tstart + (i + 1) * h)
+
+            # if x[0][-1] < x1_const:
+            #     print("target value was reached")
+            #     break
 
         except Exception as e:
             print(f"CalculationError: {e.args[0]}")
