@@ -1,6 +1,23 @@
 import numpy as np
 import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+
+text_color = "000000"
+
+plt.rcParams.update({
+    'font.size': 16,
+    'text.color': text_color,
+    'axes.edgecolor': text_color,
+    'xtick.color': text_color,
+    'ytick.color': text_color,
+    'axes.labelcolor': text_color,
+})
+
+plt.rc('figure', dpi=100)
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
+plt.rc('text.latex', preamble=r'\usepackage{textgreek}')
 
 
 def to_df(t, x, control, labels):
@@ -48,6 +65,9 @@ def plot_two(df1, df2, workdir):
 
         ax1.plot(df1.iloc[1::, 0], df1.iloc[1::, i], linestyle="-", linewidth=1.9, color="red", alpha=0.85)
         ax2.plot(df2.iloc[1::, 0], df2.iloc[1::, i], linestyle="-", linewidth=1.9, color="darkturquoise", alpha=0.85)
+
+        ax2.spines['left'].set_color('red')
+        ax2.spines['right'].set_color('darkturquoise')
 
         if i == 1:
             ax2.plot(df1.iloc[1::, 0], np.zeros(df1.shape[0] - 1), linewidth=5.0, color="red", alpha=0.8)

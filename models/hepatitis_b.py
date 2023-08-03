@@ -52,5 +52,5 @@ def f10(a, x):
     return a[31] * x[8][-1] - a[32] * x[0][-1] * x[9][-1] - a[33] * x[9][-1]
 
 
-def f11(a, n, x1_const, x):
-    return n * (x[0][-1] - x1_const)
+def f11(n, x1_const, x1):
+    return n * (x1 - x1_const)
