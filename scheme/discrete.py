@@ -1,3 +1,4 @@
+import random
 import numpy as np
 import models.hepatitis_b as model
 import numerical_methods.euler as euler
@@ -87,7 +88,7 @@ def calculate(time, history, a, control_params=None):
 
             xi = model.get_xi(x, 0.5)
 
-            n, k, x1_const, psi, psi1, psi2, u, disturbance = 0, 0, 0, 0, 0, 0, 0, 0
+            n, k, x1_const, psi, psi1, psi2, u, disturbance1, disturbance2 = 0, 0, 0, 0, 0, 0, 0, 0, 0
 
             if control_params is not None:
                 x1_const = control_params['x1_const']
@@ -96,13 +97,22 @@ def calculate(time, history, a, control_params=None):
 
                 if control_params['type'] == 'adar':
                     psi, psi1, psi2, u = stc.adar(a, h, l1, l2, xi, x1_const, x, xlag)
-                    disturbance = 0
+                    disturbance1 = 0
+                    disturbance2 = 0
 
                 elif control_params['type'] == 'nad':
                     k = control_params['k']
                     n = control_params['n']
-                    disturbance = control_params['disturbance']
+                    disturbance1 = control_params['disturbance']
                     psi, psi1, psi2, u = stc.nad(a, h, k, n, l1, l2, xi, x1_const, x, xlag)
+
+                elif control_params['type'] == 'nas':
+                    c = control_params['c']
+                    mean = control_params['mean']
+                    variance = control_params['variance']
+                    disturbance1 = random.normalvariate(mean, variance)
+                    disturbance2 = random.normalvariate(mean, variance)
+                    psi, psi1, psi2, u = stc.nas(a, c, control[1][-1], h, l1, l2, xi, x1_const, x, xlag)
 
                 if u < 0:
                     u = 0
@@ -123,9 +133,13 @@ def calculate(time, history, a, control_params=None):
             x[6].append(euler.x7_next(a, xi, h, x, xlag))
             x[7].append(euler.x8_next(a, xi, h, x, xlag))
             x[8].append(euler.x9_next(a, xi, h, x, xlag))
-            x[9].append(euler.x10_next(a, h, x, u, disturbance))
 
             if control_params is not None:
+                if control_params['type'] == 'nas':
+                    x[9].append(euler.x10_next(a, h, x, u, disturbance1, disturbance2))
+                else:
+                    x[9].append(euler.x10_next(a, h, x, u, disturbance1))
+
                 if control_params['type'] == 'nad':
                     x[10].append(euler.x11_next(n, h, x1_const, x))
 

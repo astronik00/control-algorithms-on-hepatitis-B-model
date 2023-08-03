@@ -54,6 +54,21 @@ def nad(a, h, k, n, l1, l2, xi, x1_const, x, xlag):
 
     u_temp = h ** -1 * (-l1 * psi1_temp + fi_next - x[9][-1]) - model.f10(a, x) - x[10][-1]
 
-    print(u_temp)
+    # print(u_temp)
 
+    return psi_temp, psi1_temp, psi2_temp, u_temp
+
+
+def nas(a, c, psi1_prev, h, l1, l2, xi, x1_const, x, xlag):
+    psi_temp = get_psi(x1_const, x[0][-1])
+    fi_temp = get_fi_adar(a, h, l2, x1_const, x[0][-1], x[1][-1], x[2][-1], x[5][-1])
+    psi1_temp = x[9][-1] - fi_temp
+    psi2_temp = 0
+    fi_next = get_fi_adar(a, h, l2, x1_const,
+                          euler.x1_next(a, h, x),
+                          euler.x2_next(a, h, x),
+                          euler.x3_next(a, h, x),
+                          euler.x6_next(a, xi, h, x, xlag))
+
+    u_temp = h**-1 * (fi_next - l1*psi1_temp - x[9][-1]) - model.f10(a, x) - c*h**-1*(psi_temp + l1*psi1_prev)
     return psi_temp, psi1_temp, psi2_temp, u_temp
