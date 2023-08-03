@@ -22,7 +22,7 @@ def run(images_filepath, coefficients_filepath):
     a = [float(x) for x in open(coefficients_filepath).read().split("\n")]
 
     while flag:
-        user_number = int(input('1 - no control\n2 - ADAR control\n0 - exit\n>>> '))
+        user_number = int(input('1 - no control\n2 - ADAR control\n3 - NAD control\n4 - NAS control\n0 - exit\n>>> '))
 
         if user_number == 1:
             tstart = int(input('Time start:\n>>> '))
@@ -30,7 +30,7 @@ def run(images_filepath, coefficients_filepath):
             h = float(input('Time step:\n>>> '))
 
             input_history = [float(item) for item in input(
-                'History values: (press \'enter\' to use default history [1e-6, 0, 0, 1, 1, 1, 1, 1, 1, 1])\n>>> ').split()]
+                'History values: (hit \'enter\' to use default history [1e-6, 0, 0, 1, 1, 1, 1, 1, 1, 1])\n>>> ').split()]
 
             if len(input_history) == 10:
                 history = input_history
@@ -47,11 +47,11 @@ def run(images_filepath, coefficients_filepath):
             tend = int(input('Time end:\n>>> '))
             h = float(input('Time step:\n>>> '))
             x1_const = float(input('Target value:\n>>> '))
-            l1 = float(input('Parameter l1:\n>>> '))
-            l2 = float(input('Parameter l2:\n>>> '))
+            l1 = float(input('Parameter l1 (-1 < l1 < 1):\n>>> '))
+            l2 = float(input('Parameter l2 (-1 < l2 < 1):\n>>> '))
 
             input_history = [float(item) for item in input(
-                'History values: (press \'enter\' to use default history [1e-6, 0, 0, 0, 1, 1, 1, 1, 1, 1])\n>>> ')
+                'History values: (hit \'enter\' to use default history [1e-6, 0, 0, 0, 1, 1, 1, 1, 1, 1])\n>>> ')
             .split()]
 
             if len(input_history) == 10:
@@ -66,5 +66,54 @@ def run(images_filepath, coefficients_filepath):
             plotter.plot_x(df, images_filepath + 'adar/')
             print('Successfully calculated hepatitis B acute stage with ADAR control\n')
 
+        elif user_number == 3:
+            tstart = int(input('Time start:\n>>> '))
+            tend = int(input('Time end:\n>>> '))
+            h = float(input('Time step:\n>>> '))
+            x1_const = float(input('Target value:\n>>> '))
+            l1 = float(input('Parameter l1 (-1 < l1 < 1):\n>>> '))
+            l2 = float(input('Parameter l2 (-1 < l2 < 1):\n>>> '))
+
+            input_history = [float(item) for item in input(
+                'History values: (hit \'enter\' to use default history [1e-6, 0, 0, 0, 1, 1, 1, 1, 1, 1])\n>>> ')
+            .split()]
+
+            k = float(input('Parameter k (k > 0):\n>>> '))
+            n = float(input('Parameter n (n > 0):\n>>> '))
+            disturbance = float(input('Disturbance eta :\n>>> '))
+
+            t, x, control = discrete.calculate([tstart, tend, h], history, a,
+                                               control_params={'type': 'adar',
+                                                               'x1_const': x1_const,
+                                                               'l1': l1,
+                                                               'l2': l2,
+                                                               'k' : k,
+                                                               'n': n,
+                                                               'disturbance': disturbance})
+
+        elif user_number == 4:
+            tstart = int(input('Time start:\n>>> '))
+            tend = int(input('Time end:\n>>> '))
+            h = float(input('Time step:\n>>> '))
+            x1_const = float(input('Target value:\n>>> '))
+            l1 = float(input('Parameter l1 (-1 < l1 < 1):\n>>> '))
+            l2 = float(input('Parameter l2 (-1 < l2 < 1):\n>>> '))
+
+            input_history = [float(item) for item in input(
+                'History values: (hit \'enter\' to use default history [1e-6, 0, 0, 0, 1, 1, 1, 1, 1, 1])\n>>> ')
+            .split()]
+
+            c = float(input('Parameter k (k > 0):\n>>> '))
+            mean = float(input('Mathematical expectation:\n>>> '))
+            variance = float(input('Statistical dispersion:\n>>> '))
+
+            t, x, control = discrete.calculate([tstart, tend, h], history, a,
+                                               control_params={'type': 'adar',
+                                                               'x1_const': x1_const,
+                                                               'l1': l1,
+                                                               'l2': l2,
+                                                               'c': c,
+                                                               'mean': mean,
+                                                               'variance': variance})
         else:
             flag = False

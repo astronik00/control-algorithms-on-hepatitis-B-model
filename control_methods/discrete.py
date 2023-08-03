@@ -12,8 +12,8 @@ def get_psi2(k, x1_const, x1, x11):
 
 def get_fi_adar(a, h, l2, x1_const, x1, x2, x3, x6):
     return (-a[2] * x1) ** -1 * (
-                h ** -1 * (x1_const - l2 * get_psi(x1_const, x1) - x1) - (a[0] + a[1] * x6) * x2 + a[3] * x1 + a[4] * (
-                    1 - x2 - x3) * x1)
+            h ** -1 * (x1_const - l2 * get_psi(x1_const, x1) - x1) - (a[0] + a[1] * x6) * x2 + a[3] * x1 + a[4] * (
+            1 - x2 - x3) * x1)
 
 
 def get_fi_nad(a, k, n, h, l2, x1_const, x1, x2, x3, x6, x11, x):
@@ -70,5 +70,9 @@ def nas(a, c, psi1_prev, h, l1, l2, xi, x1_const, x, xlag):
                           euler.x3_next(a, h, x),
                           euler.x6_next(a, xi, h, x, xlag))
 
-    u_temp = h**-1 * (fi_next - l1*psi1_temp - x[9][-1]) - model.f10(a, x) - c*h**-1*(psi_temp + l1*psi1_prev)
+    u_temp = h ** -1 * (fi_next - l1 * psi1_temp - x[9][-1]) - model.f10(a, x) - h ** -1 * c * (
+                psi1_temp + l1 * psi1_prev)
+
+    print(u_temp)
+
     return psi_temp, psi1_temp, psi2_temp, u_temp

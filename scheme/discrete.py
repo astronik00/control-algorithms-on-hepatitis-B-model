@@ -112,12 +112,16 @@ def calculate(time, history, a, control_params=None):
                     variance = control_params['variance']
                     disturbance1 = random.normalvariate(mean, variance)
                     disturbance2 = random.normalvariate(mean, variance)
-                    psi, psi1, psi2, u = stc.nas(a, c, control[1][-1], h, l1, l2, xi, x1_const, x, xlag)
 
-                if u < 0:
-                    u = 0
-                elif u > 20:
-                    u = 20
+                    if i > 0:
+                        psi, psi1, psi2, u = stc.nas(a, c, control[1][-2], h, l1, l2, xi, x1_const, x, xlag)
+                    else:
+                        psi, psi1, psi2, u = stc.nas(a, c, control[1][-1], h, l1, l2, xi, x1_const, x, xlag)
+
+                # if u < 0:
+                #     u = 0
+                # elif u > 25:
+                #     u = 25
 
             control[0].append(psi)
             control[1].append(psi1)

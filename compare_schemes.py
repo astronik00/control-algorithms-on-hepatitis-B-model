@@ -29,14 +29,14 @@ control_labels = ["\psi", "\psi_1", "\psi_2", "u"]
 #                                                      'n': 0.1,
 #                                                      'disturbance': 0.1})
 
-t, x, control = discrete.calculate([0, 500, 0.01], history, a,
-                                     control_params={'type': 'nas',
-                                                     'x1_const': 1e-8,
-                                                     'l1': -0.9,
-                                                     'l2': -0.9,
-                                                     'c': 0.1,
-                                                     'mean': 0,
-                                                     'variance': 0.5})
+t, x, control = discrete.calculate([0, 120, 0.01], history, a,
+                                   control_params={'type': 'nas',
+                                                   'x1_const': 1e-8,
+                                                   'l1': -0.9,
+                                                   'l2': -0.9,
+                                                   'c': 0.1,
+                                                   'mean': 0,
+                                                   'variance': 1.0})
 
 df4 = plotter.to_df(t, x, control, [model_labels, control_labels])
-plotter.plot_x(df4,'images/nas/')
+plotter.plot_x(df4, 'images/nas/')
