@@ -38,7 +38,10 @@ def x9_next(a, xi, h, x, xlag):
 
 
 def x10_next(a, h, x, u, disturbance1=None, disturbance2=None):
-    return x[9][-1] + h * (model.f10(a, x) + u + disturbance1 + disturbance2)
+    if disturbance1 is not None and disturbance2 is not None:
+        return x[9][-1] + h * (model.f10(a, x) + u + disturbance1 + disturbance2)
+    return x[9][-1] + h * (model.f10(a, x) + u + disturbance1)
+
 
 
 def x11_next(n, h, x1_const, x):

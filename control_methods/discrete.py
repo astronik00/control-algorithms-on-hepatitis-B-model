@@ -73,6 +73,6 @@ def nas(a, c, psi1_prev, h, l1, l2, xi, x1_const, x, xlag):
     u_temp = h ** -1 * (fi_next - l1 * psi1_temp - x[9][-1]) - model.f10(a, x) - h ** -1 * c * (
                 psi1_temp + l1 * psi1_prev)
 
-    print(u_temp)
+    # print(u_temp)
 
     return psi_temp, psi1_temp, psi2_temp, u_temp
