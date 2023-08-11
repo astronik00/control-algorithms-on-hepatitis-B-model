@@ -2,7 +2,7 @@ import random
 import numpy as np
 import models.hepatitis_b as model
 import numerical_methods.euler as euler
-import control_methods.discrete as stc
+import synergetic_control.discrete.control as stc
 
 
 def get_delay(i, m, x, lags):
@@ -39,71 +39,63 @@ def get_delay(i, m, x, lags):
     return lags
 
 
-def calculate(time, history, a, control_params=None):
+def calculate(time, history, a, control_params=None, disturbances=None):
     tstart = time[0]
     tend = time[1]
     h = time[2]
     t = [tstart]
+    t_reach = -1
 
     tau = [a[9], a[19], a[14], a[25], a[29]]
     m = np.int32(np.divide(tau, h))
     points = int((tend - tstart) / h)
 
+    disturbances_list = [[0], [0]]
     control = [[0], [0], [0], [0]]
+    psi1_prev = [0]
 
-    if control_params is not None:
-        if control_params['type'] == 'nad':
-            x = ([history[0]], [history[1]], [history[2]], [history[3]], [history[4]],
-                 [history[5]], [history[6]], [history[7]], [history[8]], [history[9]],
-                 [history[10]])
+    x = ([history[0]], [history[1]], [history[2]], [history[3]], [history[4]],
+         [history[5]], [history[6]], [history[7]], [history[8]], [history[9]],
+         [history[10]])
 
-            xlag = [[[], [], [], [], [], [], [], [], [], [], []],
-                    [[], [], [], [], [], [], [], [], [], [], []],
-                    [[], [], [], [], [], [], [], [], [], [], []],
-                    [[], [], [], [], [], [], [], [], [], [], []],
-                    [[], [], [], [], [], [], [], [], [], []], []]
-        else:
-            x = ([history[0]], [history[1]], [history[2]], [history[3]], [history[4]],
-                 [history[5]], [history[6]], [history[7]], [history[8]], [history[9]])
-
-            xlag = [[[], [], [], [], [], [], [], [], [], []],
-                    [[], [], [], [], [], [], [], [], [], []],
-                    [[], [], [], [], [], [], [], [], [], []],
-                    [[], [], [], [], [], [], [], [], [], []],
-                    [[], [], [], [], [], [], [], [], [], []]]
-
-    else:
-        x = ([history[0]], [history[1]], [history[2]], [history[3]], [history[4]],
-             [history[5]], [history[6]], [history[7]], [history[8]], [history[9]])
-
-        xlag = [[[], [], [], [], [], [], [], [], [], []],
-                [[], [], [], [], [], [], [], [], [], []],
-                [[], [], [], [], [], [], [], [], [], []],
-                [[], [], [], [], [], [], [], [], [], []],
-                [[], [], [], [], [], [], [], [], [], []]]
+    xlag = [[[], [], [], [], [], [], [], [], [], [], []],
+            [[], [], [], [], [], [], [], [], [], [], []],
+            [[], [], [], [], [], [], [], [], [], [], []],
+            [[], [], [], [], [], [], [], [], [], [], []],
+            [[], [], [], [], [], [], [], [], [], []], []]
 
     for i in range(points):
         try:
+            # print(i)
             xlag = get_delay(i, m, x, xlag)
 
-            xi = model.get_xi(x, 0.5)
+            xi = model.get_xi(0.5, x)
 
-            n, k, x1_const, psi, psi1, psi2, u, disturbance1, disturbance2 = 0, 0, 0, 0, 0, 0, 0, 0, 0
+            n, k, psi, psi1, psi2, u, disturbance1, disturbance2 = 0, 0, 0, 0, 0, 0, 0, 0
 
+            #if t[-1] >= 65 and t[i] <= 120:
             if control_params is not None:
                 x1_const = control_params['x1_const']
                 l1 = control_params['l1']
                 l2 = control_params['l2']
+                b = control_params['b']
+
+                if x[0][-1] - x1_const < 1e-11 or x[0][-1] < x1_const:
+                    t_reach = t[-1]
+
 
                 if control_params['type'] == 'adar':
                     psi, psi1, psi2, u = stc.adar(a, h, l1, l2, xi, x1_const, x, xlag)
-                    disturbance1 = 0
-                    disturbance2 = 0
+
+                    if disturbances is not None:
+                        disturbance1 = disturbances[0][i]
+                        disturbance2 = disturbances[1][i]
 
                 elif control_params['type'] == 'nad':
                     k = control_params['k']
                     n = control_params['n']
                     disturbance1 = control_params['disturbance']
+                    # disturbance1 = math.sin(math.pi * t[-1] / 2)
                     psi, psi1, psi2, u = stc.nad(a, h, k, n, l1, l2, xi, x1_const, x, xlag)
 
                 elif control_params['type'] == 'nas':
@@ -113,15 +105,22 @@ def calculate(time, history, a, control_params=None):
                     disturbance1 = random.normalvariate(mean, variance)
                     disturbance2 = random.normalvariate(mean, variance)
 
-                    if i > 0:
-                        psi, psi1, psi2, u = stc.nas(a, c, control[1][-2], h, l1, l2, xi, x1_const, x, xlag)
-                    else:
-                        psi, psi1, psi2, u = stc.nas(a, c, control[1][-1], h, l1, l2, xi, x1_const, x, xlag)
+                    disturbances_list[0].append(disturbance1)
+                    disturbances_list[1].append(disturbance2)
+                    psi, psi1, psi2, u = stc.nas(a, c, psi1_prev[-1], h, l1, l2, xi, x1_const, x, xlag)
 
+
+                if b != -1:
+                    if u < 0:
+                        u = 0
+                    elif u > b:
+                        u = b
+                #
                 # if u < 0:
                 #     u = 0
-                # elif u > 25:
-                #     u = 25
+
+            if t_reach != -1:
+                break
 
             control[0].append(psi)
             control[1].append(psi1)
@@ -137,24 +136,30 @@ def calculate(time, history, a, control_params=None):
             x[6].append(euler.x7_next(a, xi, h, x, xlag))
             x[7].append(euler.x8_next(a, xi, h, x, xlag))
             x[8].append(euler.x9_next(a, xi, h, x, xlag))
+            psi1_prev.append(control[1][i])
 
             if control_params is not None:
                 if control_params['type'] == 'nas':
                     x[9].append(euler.x10_next(a, h, x, u, disturbance1, disturbance2))
-                else:
+                    x[10].append(0)
+                elif control_params['type'] == 'nad':
+                    x1_const = control_params['x1_const']
                     x[9].append(euler.x10_next(a, h, x, u, disturbance1))
-
-                if control_params['type'] == 'nad':
                     x[10].append(euler.x11_next(n, h, x1_const, x))
+                elif control_params['type'] == 'adar':
+                    x[9].append(euler.x10_next(a, h, x, u))
+                    x[10].append(0)
+            else:
+                x[9].append(euler.x10_next(a, h, x, 0))
+                x[10].append(0)
 
             t.append(tstart + (i + 1) * h)
 
             # if x[0][-1] < x1_const:
-            #     print("target value was reached")
-            #     break
+            #     t_reach = [i, t[-1]]
 
         except Exception as e:
             print(f"CalculationError: {e.args[0]}")
             break
 
-    return t, x, control
+    return t, t_reach, x, control, disturbances_list

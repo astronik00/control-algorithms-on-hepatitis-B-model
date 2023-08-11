@@ -1,4 +1,4 @@
-def get_xi(x, threshold):
+def get_xi(threshold, x):
     if x[2][-1] < 0:
         raise Exception(f"m is out of range. Expected: [0; 1], actual: {x[2][-1]}")
     if x[2][-1] >= 1:

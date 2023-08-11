@@ -11,7 +11,7 @@ def main():
 
     flag = True
 
-    print("Hello and welcome to hepatitis B modeling script for continuous case")
+    print("Hello and welcome to hepatitis B modeling script for continuos case")
 
     # create required paths if not exist
     for path in images_paths:
@@ -19,7 +19,7 @@ def main():
             os.makedirs(path)
 
     while flag:
-        user_number = int(input('1 - change workdir\n2 - continuous\n3 - discrete\n0 - exit\n>>> '))
+        user_number = int(input('1 - change workdir\n2 - continuos\n3 - discrete\n0 - exit\n>>> '))
 
         if user_number == 1:
             user_number = int(input('\n1 - change coefficients dir\n2 - change images dir\n>>> '))
